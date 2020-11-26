@@ -25,13 +25,14 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                ansiblePlaybook('provisioning/deploy.yml') {
-                    inventoryPath('/etc/ansible/hosts')
-                    colorizedOutput(true)
-                    extraVars {
-                        extraVar('GIT_COMMIT', '${GIT_COMMIT}', false)
-                    }
-                }
+                ansiblePlaybook(
+                    playbook: 'provisioning/deploy.yml',
+                    inventory: '/etc/ansible/hosts',
+                    colorized: true,
+                    extraVars: [
+                        GIT_COMMIT: '${GIT_COMMIT}'
+                    ]
+                )
             }
         }
     }
