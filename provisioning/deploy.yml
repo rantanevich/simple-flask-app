@@ -1,0 +1,14 @@
+---
+- name: Deploy a new version of flask-app
+  hosts: docker
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: update container
+      docker_compose:
+        project_src: /opt/flask
+        services: app
+        state: present
+      environment:
+        TAG_NAME: "{{ GIT_COMMIT }}"

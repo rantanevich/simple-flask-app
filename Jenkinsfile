@@ -22,5 +22,18 @@ pipeline {
                 sh 'docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT}'
             }
         }
+        stage('Deploy') {
+            steps {
+                ansiColor('xterm') {
+                    ansiblePlaybook('provisioning/deploy.yml') {
+                        inventoryPath('/etc/ansible/hosts')
+                        colorizedOutput(true)
+                        extraVars {
+                            extraVar('GIT_COMMIT', '${GIT_COMMIT}', false)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
