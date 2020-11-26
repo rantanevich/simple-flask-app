@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     options {
+        ansiColor('xterm')
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
@@ -24,13 +25,11 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                ansiColor('xterm') {
-                    ansiblePlaybook('provisioning/deploy.yml') {
-                        inventoryPath('/etc/ansible/hosts')
-                        colorizedOutput(true)
-                        extraVars {
-                            extraVar('GIT_COMMIT', '${GIT_COMMIT}', false)
-                        }
+                ansiblePlaybook('provisioning/deploy.yml') {
+                    inventoryPath('/etc/ansible/hosts')
+                    colorizedOutput(true)
+                    extraVars {
+                        extraVar('GIT_COMMIT', '${GIT_COMMIT}', false)
                     }
                 }
             }
