@@ -21,14 +21,10 @@ pipeline {
         }
         stage('Test') {
             agent {
-                docker {
-                    image 'python:3.8.6-slim-buster'
-                    args '-u root:sudo'
-                }
+                dockerfile 'Dockerfile.test'
             }
             steps {
                 sh 'ls -la'
-                sh 'pip install --no-cache-dir flake8 pytest'
                 sh 'python -m flake8 --exclude=".git,venv"'
                 sh 'python -m pytest tests'
                 sh 'python -m unittest'
@@ -36,7 +32,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile'
+                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod'
             }
         }
         stage('Push') {
