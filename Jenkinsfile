@@ -19,6 +19,9 @@ pipeline {
             steps {
                 sh 'export'
                 sh 'ls -la'
+                script {
+                    env.BRANCH_NAME = env.GIT_BRANCH.replace('origin/', '')
+                }
             }
         }
         stage('Test') {
@@ -27,6 +30,9 @@ pipeline {
                     filename 'Dockerfile.test'
                     args '-u root:root'
                 }
+            }
+            options {
+                skipDefaultCheckout()
             }
             steps {
                 sh 'ls -la'
