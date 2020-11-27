@@ -8,8 +8,7 @@ pipeline {
 
     environment {
         OWNER = 'rantanevich'
-        REPO = 'simple-flask-app'
-        IMAGE_NAME = 'flask-app'
+        REPOSITORY = 'simple-flask-app'
         REGISTRY = credentials('DOCKER_REGISTRY')
         GITHUB_TOKEN = credentials('GITHUB_TOKEN')
     }
@@ -20,15 +19,28 @@ pipeline {
                 sh 'export'
             }
         }
+        stage('Test') {
+            agent {
+                docker {
+                    dockerfile true
+                    args '-u root:sudo -f Dockerfile.test'
+                }
+            }
+            steps {
+                sh 'python -m flake8 --exclude=".git,venv"'
+                sh 'python -m pytest tests'
+                sh 'python -m unittest'
+            }
+        }
         stage('Build') {
             steps {
-                sh 'docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .'
+                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod'
             }
         }
         stage('Push') {
             steps {
-                sh 'docker tag ${IMAGE_NAME}:${GIT_COMMIT} ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT}'
-                sh 'docker push ${REGISTRY}/${IMAGE_NAME}:${GIT_COMMIT}'
+                sh 'docker tag ${REPOSITORY}:${GIT_COMMIT} ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
+                sh 'docker push ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
             }
         }
         stage('Deploy') {
@@ -47,7 +59,7 @@ pipeline {
 
     post {
         success {
-            sh '''curl "https://api.github.com/repos/${OWNER}/${REPO}/statuses/${GIT_COMMIT}" \
+            sh '''curl "https://api.github.com/repos/${OWNER}/${REPOSITORY}/statuses/${GIT_COMMIT}" \
                         -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Content-Type: application/json" \
                         -X POST \
@@ -55,7 +67,7 @@ pipeline {
             '''
         }
         failure {
-            sh '''curl "https://api.github.com/repos/${OWNER}/${REPO}/statuses/${GIT_COMMIT}" \
+            sh '''curl "https://api.github.com/repos/${OWNER}/${REPOSITORY}/statuses/${GIT_COMMIT}" \
                         -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Content-Type: application/json" \
                         -X POST \
