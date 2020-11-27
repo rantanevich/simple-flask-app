@@ -32,7 +32,6 @@ pipeline {
                 }
             }
             steps {
-                sh 'ls -la'
                 sh 'python -m flake8 --exclude=".git,venv"'
                 sh 'python -m pytest tests'
                 sh 'python -m unittest'
