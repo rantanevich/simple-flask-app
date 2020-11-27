@@ -3,7 +3,6 @@ pipeline {
 
     options {
         ansiColor('xterm')
-        skipDefaultCheckout(true)
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
@@ -16,11 +15,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Debug') {
             steps {
                 sh 'export'
@@ -39,6 +33,9 @@ pipeline {
                     args '-u root:root'
                 }
             }
+            options {
+                skipDefaultCheckout()
+            }
             steps {
                 sh 'ls -la'
                 sh 'python -m flake8 --exclude=".git,venv"'
@@ -46,39 +43,35 @@ pipeline {
                 sh 'python -m unittest'
             }
         }
-        stage('Build') {
+        stage('Prepare for production') {
             when {
                 branch 'jenkins'
                 buildingTag()
             }
-            steps {
-                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod .'
-            }
-        }
-        stage('Push to Registry') {
-            when {
-                branch 'jenkins'
-                buildingTag()
-            }
-            steps {
-                sh 'docker tag ${REPOSITORY}:${GIT_COMMIT} ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
-                sh 'docker push ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
-            }
-        }
-        stage('Deploy to Production') {
-            when {
-                branch 'jenkins'
-                buildingTag()
-            }
-            steps {
-                ansiblePlaybook(
-                    playbook: 'provisioning/deploy.yml',
-                    inventory: '/etc/ansible/hosts',
-                    colorized: true,
-                    extraVars: [
-                        GIT_COMMIT: '${GIT_COMMIT}'
-                    ]
-                )
+            stages {
+                stage('Build') {
+                    steps {
+                        sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod .'
+                    }
+                }
+                stage('Push to Registry') {
+                    steps {
+                        sh 'docker tag ${REPOSITORY}:${GIT_COMMIT} ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
+                        sh 'docker push ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
+                    }
+                }
+                stage('Deploy') {
+                    steps {
+                        ansiblePlaybook(
+                            playbook: 'provisioning/deploy.yml',
+                            inventory: '/etc/ansible/hosts',
+                            colorized: true,
+                            extraVars: [
+                                GIT_COMMIT: '${GIT_COMMIT}'
+                            ]
+                        )
+                    }
+                }
             }
         }
     }
