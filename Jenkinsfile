@@ -21,20 +21,12 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        stage('Prepare test image') {
-            steps {
-                sh 'docker build -t ${REPOSITORY}:test-image -f Dockerfile.test .'
-            }
-        }
         stage('Test') {
             agent {
-                docker {
-                    image '${REPOSITORY}:test-image'
+                dockerfile {
+                    filename 'Dockerfile.test'
                     args '-u root:root'
                 }
-            }
-            options {
-                skipDefaultCheckout()
             }
             steps {
                 sh 'ls -la'
