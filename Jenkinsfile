@@ -51,7 +51,7 @@ pipeline {
                         -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Content-Type: application/json" \
                         -X POST \
-                        -d "{\\\"state\\\": \\\"success\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"${JENKINS_URL}/job/${PROJECT}/${BUILD_NUMBER}/console\\\"}"
+                        -d "{\\\"state\\\": \\\"success\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"${JOB_URL}/${BUILD_NUMBER}/console\\\"}"
             '''
         }
         failure {
@@ -59,7 +59,7 @@ pipeline {
                         -H "Authorization: token ${GITHUB_TOKEN}" \
                         -H "Content-Type: application/json" \
                         -X POST \
-                        -d "{\\\"state\\\": \\\"failure\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"${JENKINS_URL}/job/${PROJECT}/${BUILD_NUMBER}/console\\\"}"
+                        -d "{\\\"state\\\": \\\"failure\\\",\\\"context\\\": \\\"continuous-integration/jenkins\\\", \\\"description\\\": \\\"Jenkins\\\", \\\"target_url\\\": \\\"${JOB_URL}/${BUILD_NUMBER}/console\\\"}"
             '''
         }
     }
