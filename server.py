@@ -8,4 +8,4 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     time = datetime.now().ctime()
-    rturn f'Time in Minsk: {time}'
+    return f'Time in Minsk: {time}'
