@@ -19,9 +19,16 @@ pipeline {
                 sh 'export'
             }
         }
+        stage('Prepare test image') {
+            steps {
+                sh 'docker build -t ${REPOSITORY}:test-image -f Dockerfile.test .'
+            }
+        }
         stage('Test') {
             agent {
-                dockerfile 'Dockerfile.test'
+                docker {
+                    image '${REPOSITORY}:test-image'
+                }
             }
             steps {
                 sh 'ls -la'
