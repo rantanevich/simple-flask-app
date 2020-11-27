@@ -38,7 +38,6 @@ pipeline {
         stage('Prepare for production') {
             when {
                 branch 'jenkins'
-                buildingTag()
             }
             stages {
                 stage('Build') {
