@@ -21,16 +21,10 @@ pipeline {
                 sh 'ls -la'
             }
         }
-        stage('Prepare test image') {
-            steps {
-                sh 'docker build -t ${REPOSITORY}:test-image -f Dockerfile.test .'
-            }
-        }
         stage('Test') {
             agent {
-                docker {
-                    image '${REPOSITORY}:test-image'
-                    args '-u root:root'
+                dockerfile {
+                    filename 'Dockerfile.test'
                 }
             }
             options {
@@ -46,7 +40,6 @@ pipeline {
         stage('Prepare for production') {
             when {
                 branch 'jenkins'
-                buildingTag()
             }
             stages {
                 stage('Build') {
