@@ -28,6 +28,7 @@ pipeline {
             agent {
                 docker {
                     image '${REPOSITORY}:test-image'
+                    args '-u root:root'
                 }
             }
             steps {

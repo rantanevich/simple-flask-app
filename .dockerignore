@@ -1,3 +1,7 @@
+.git/
+.gitignore
+.dockerignore
+Dockerfile*
+*.md
 provisioning/
-README.md
 Jenkinsfile
