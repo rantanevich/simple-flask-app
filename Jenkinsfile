@@ -39,7 +39,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod'
+                sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod .'
             }
         }
         stage('Push') {
