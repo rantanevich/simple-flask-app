@@ -9,3 +9,4 @@ RUN pip install --no-cache-dir flake8 pytest
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+COPY . .

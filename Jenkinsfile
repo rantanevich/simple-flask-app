@@ -3,6 +3,7 @@ pipeline {
 
     options {
         ansiColor('xterm')
+        skipDefaultCheckout(true)
         buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
@@ -14,9 +15,15 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage('Debug') {
             steps {
                 sh 'export'
+                sh 'ls -la'
             }
         }
         stage('Prepare test image') {
@@ -32,23 +39,36 @@ pipeline {
                 }
             }
             steps {
+                sh 'ls -la'
                 sh 'python -m flake8 --exclude=".git,venv"'
                 sh 'python -m pytest tests'
                 sh 'python -m unittest'
             }
         }
         stage('Build') {
+            when {
+                branch 'jenkins'
+                buildingTag()
+            }
             steps {
                 sh 'docker build -t ${REPOSITORY}:${GIT_COMMIT} -f Dockerfile.prod .'
             }
         }
-        stage('Push') {
+        stage('Push to Registry') {
+            when {
+                branch 'jenkins'
+                buildingTag()
+            }
             steps {
                 sh 'docker tag ${REPOSITORY}:${GIT_COMMIT} ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
                 sh 'docker push ${REGISTRY}/${REPOSITORY}:${GIT_COMMIT}'
             }
         }
-        stage('Deploy') {
+        stage('Deploy to Production') {
+            when {
+                branch 'jenkins'
+                buildingTag()
+            }
             steps {
                 ansiblePlaybook(
                     playbook: 'provisioning/deploy.yml',
